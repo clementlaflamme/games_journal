@@ -1,7 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Schéma Prisma de Ratey. Voir docs/diagramme_bd.md.
+// Les ID des jeux, genres, plateformes et studios sont ceux d'IGDB (pas d'auto-incrément).
 
 generator client {
   provider = "prisma-client"
@@ -10,4 +8,105 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  /// userId Clerk (vient toujours du jeton)
+  id        String     @id
+  createdAt DateTime   @default(now()) @map("created_at")
+  games     UserGame[]
+
+  @@map("users")
+}
+
+/// Relation utilisateur–jeu. La ligne est supprimée quand le jeu n'est plus
+/// en favori, plus à jouer plus tard et sans note.
+model UserGame {
+  userId        String   @map("user_id")
+  gameId        Int      @map("game_id")
+  /// Note sur 5, au quart de point (ex. 4.25)
+  rating        Decimal? @db.Decimal(3, 2)
+  /// Commentaire optionnel de l'évaluation
+  comment       String?
+  isFavourite   Boolean  @default(false) @map("is_favourite")
+  isToPlayLater Boolean  @default(false) @map("is_to_play_later")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@id([userId, gameId])
+  @@index([gameId])
+  @@map("users_games")
+}
+
+model Game {
+  /// ID IGDB
+  id           Int       @id
+  name         String
+  releaseDate  DateTime? @map("release_date") @db.Date
+  /// image_id de la pochette IGDB
+  coverImageId String?   @map("cover_image_id")
+  /// Studio de développement principal
+  developerId  Int?      @map("developer_id")
+
+  developer Company?       @relation(fields: [developerId], references: [id], onDelete: SetNull)
+  users     UserGame[]
+  genres    GameGenre[]
+  platforms GamePlatform[]
+
+  @@index([developerId])
+  @@map("games")
+}
+
+model Genre {
+  /// ID IGDB
+  id    Int         @id
+  name  String
+  games GameGenre[]
+
+  @@map("genres")
+}
+
+model GameGenre {
+  gameId  Int @map("game_id")
+  genreId Int @map("genre_id")
+
+  game  Game  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  genre Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, genreId])
+  @@index([genreId])
+  @@map("games_genres")
+}
+
+model Platform {
+  /// ID IGDB (sert aussi à associer l'icône locale)
+  id    Int            @id
+  name  String
+  games GamePlatform[]
+
+  @@map("platforms")
+}
+
+model GamePlatform {
+  gameId     Int @map("game_id")
+  platformId Int @map("platform_id")
+
+  game     Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  platform Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, platformId])
+  @@index([platformId])
+  @@map("games_platforms")
+}
+
+model Company {
+  /// ID IGDB
+  id    Int    @id
+  name  String
+  games Game[]
+
+  @@map("companies")
 }
