@@ -145,4 +145,4 @@ vite.config.ts.timestamp-*
 # Electron-Forge
 out/
 
-/src/generated/prisma
+/server/src/generated/prisma
