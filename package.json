@@ -11,6 +11,7 @@
   "scripts": {
     "start": "electron-forge start",
     "test": "vitest run",
+    "build": "tsc --noEmit && electron-forge package",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "release": "electron-forge release",
