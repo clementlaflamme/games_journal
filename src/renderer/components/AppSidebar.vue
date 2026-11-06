@@ -98,7 +98,7 @@ const settingsItem: NavItem = {
 /* Barre d'accent à gauche de l'élément actif */
 .nav-link[aria-current='page']::before {
   content: '';
-  @apply absolute top-2 bottom-2 -left-4 w-1 rounded-r-full bg-ratey-magenta;
+  @apply absolute top-2 bottom-2 -left-[18px] w-1 rounded-r-full bg-ratey-magenta;
 }
 
 /* L'icône Figma sert de masque : sa couleur suit `currentColor`. */
