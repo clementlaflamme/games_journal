@@ -3,5 +3,5 @@
   "categories": {
     "correctness": "warn"
   },
-  "ignorePatterns": [".agents/**"]
+  "ignorePatterns": [".agents/**", ".claude/**"]
 }
